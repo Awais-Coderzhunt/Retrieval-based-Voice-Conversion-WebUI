@@ -1,9 +1,76 @@
 import os
 import sys
 import traceback
+import dataclasses
+import types
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 os.environ["PYTORCH_MPS_HIGH_WATERMARK_RATIO"] = "0.0"
+
+
+def _patch_py311_dataclasses() -> None:
+    if getattr(dataclasses, "_rvc_py311_patch", False):
+        return
+
+    def _patched_get_field(cls, a_name, a_type, default_kw_only):
+        default = getattr(cls, a_name, dataclasses.MISSING)
+        if isinstance(default, dataclasses.Field):
+            f = default
+        else:
+            if isinstance(default, types.MemberDescriptorType):
+                default = dataclasses.MISSING
+            f = dataclasses.field(default=default)
+
+        f.name = a_name
+        f.type = a_type
+        f._field_type = dataclasses._FIELD
+
+        typing = sys.modules.get("typing")
+        if typing:
+            if dataclasses._is_classvar(a_type, typing) or (
+                isinstance(f.type, str)
+                and dataclasses._is_type(
+                    f.type,
+                    cls,
+                    typing,
+                    typing.ClassVar,
+                    dataclasses._is_classvar,
+                )
+            ):
+                f._field_type = dataclasses._FIELD_CLASSVAR
+
+        if f._field_type is dataclasses._FIELD:
+            dataclasses_module = sys.modules[dataclasses.__name__]
+            if dataclasses._is_initvar(a_type, dataclasses_module) or (
+                isinstance(f.type, str)
+                and dataclasses._is_type(
+                    f.type,
+                    cls,
+                    dataclasses_module,
+                    dataclasses_module.InitVar,
+                    dataclasses._is_initvar,
+                )
+            ):
+                f._field_type = dataclasses._FIELD_INITVAR
+
+        if f._field_type in (dataclasses._FIELD_CLASSVAR, dataclasses._FIELD_INITVAR):
+            if f.default_factory is not dataclasses.MISSING:
+                raise TypeError(f"field {f.name} cannot have a default factory")
+
+        if f._field_type in (dataclasses._FIELD, dataclasses._FIELD_INITVAR):
+            if f.kw_only is dataclasses.MISSING:
+                f.kw_only = default_kw_only
+        else:
+            if f.kw_only is not dataclasses.MISSING:
+                raise TypeError(f"field {f.name} is a ClassVar but specifies kw_only")
+
+        return f
+
+    dataclasses._get_field = _patched_get_field
+    dataclasses._rvc_py311_patch = True
+
+
+_patch_py311_dataclasses()
 
 device = sys.argv[1]
 n_part = int(sys.argv[2])

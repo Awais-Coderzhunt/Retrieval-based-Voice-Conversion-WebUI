@@ -1,1 +1,21 @@
-{"pth_path": "assets/weights/kikiV1.pth", "index_path": "logs/kikiV1.index", "sg_hostapi": "MME", "sg_wasapi_exclusive": false, "sg_input_device": "VoiceMeeter Output (VB-Audio Vo", "sg_output_device": "VoiceMeeter Input (VB-Audio Voi", "sr_type": "sr_device", "threhold": -60.0, "pitch": 12.0, "formant": 0.0, "rms_mix_rate": 0.5, "index_rate": 0.0, "block_time": 0.15, "crossfade_length": 0.08, "extra_time": 2.0, "n_cpu": 4.0, "use_jit": false, "use_pv": false, "f0method": "fcpe"}
+{
+  "pth_path": "D:\\vice\\third_party\\rvc\\assets\\weights\\voice-dc0a236e_e20_s280.pth",
+  "index_path": "D:\\vice\\third_party\\rvc\\logs\\voice-dc0a236e\\added_IVF98_Flat_nprobe_1_voice-dc0a236e_v2.index",
+  "sg_hostapi": "Windows WDM-KS",
+  "sg_wasapi_exclusive": false,
+  "sg_input_device": "CABLE Output (VB-Audio Point) (Windows WDM-KS)",
+  "sg_output_device": "CABLE In 16ch (VB-Audio Virtual (MME)",
+  "sr_type": "sr_model",
+  "threhold": -60,
+  "pitch": 0,
+  "formant": 0.0,
+  "index_rate": 0.3,
+  "rms_mix_rate": 0.0,
+  "block_time": 0.25,
+  "crossfade_length": 0.05,
+  "extra_time": 2.5,
+  "n_cpu": 4,
+  "f0method": "fcpe",
+  "use_jit": false,
+  "use_pv": false
+}
